@@ -1,0 +1,55 @@
+version: '2'
+services:
+  nest:
+    env_file:
+      - .env
+    build: .
+    container_name: nest-app
+    depends_on:
+      - db
+    ports:
+      - 3000:3000
+  db:
+    image: postgres:latest
+    container_name: nest-db
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    container_name: nest-redis
+    ports:
+      - 6379:6379
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    restart: 'yes'
+    ports:
+      - '9000:9000'
+    environment:
+      KAFKA_BROKERCONNECT: 'kafka:29092'
+      JVM_OPTS: '-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify'
+    depends_on:
+      - 'kafka'
+  kafka:
+    image: obsidiandynamics/kafka
+    restart: 'yes'
+    ports:
+      - '2181:2181'
+      - '9092:9092'
+    environment:
+      KAFKA_LISTENERS: 'INTERNAL://:29092,EXTERNAL://:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka:29092,EXTERNAL://localhost:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT: '6000'
+      KAFKA_RESTART_ATTEMPTS: '10'
+      KAFKA_RESTART_DELAY: '5'
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: '0'
+
+volumes:
+  pgdata:
