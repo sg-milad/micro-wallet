@@ -2,7 +2,7 @@ import { DynamicModule, Global, Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import * as dotenv from 'dotenv';
-import { UserEntity } from '../../entities/user.entity';
+import { WalletEntity } from '../entities/wallet.entity';
 
 dotenv.config({
     path: './.env'
@@ -17,8 +17,8 @@ export const options: TypeOrmModuleOptions = {
     database:
         process.env.NODE_ENV === 'tEsT'
             ? 'test'
-            : process.env.POSTGRES_DB || 'postgres',
-    entities: [UserEntity],
+            : process.env.POSTGRES_DB_WALLET || 'postgres_wallet',
+    entities: [WalletEntity],
     migrationsRun: true,
     synchronize: true,
 
