@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { DatabaseModule } from './common/database/database.module';
 import { UserModule } from './modules/user/user.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -14,7 +12,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         options: {
           client: {
             clientId: 'wallet',
-            brokers: ['localhost:9092']
+            brokers: [process.env.KAFKA_BROKERS]
           },
           consumer: {
             groupId: 'wallet-consumer'
@@ -23,7 +21,5 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
       }]
     })],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule { }

@@ -8,7 +8,7 @@ import { CreateUserEvent } from './event/create-user.event';
 import { map } from 'rxjs';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserEvent } from './event/update-user.event';
-import { UpdateUserAmountDto } from './dto/update-user-amount';
+import { UpdateUserAmountDto } from './dto/update-user-amount.dto';
 import { UpdateUserAmount } from './event/update-user-amount.event';
 @Injectable()
 export class UserService {

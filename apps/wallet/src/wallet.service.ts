@@ -3,12 +3,12 @@ import { Repository } from 'typeorm';
 import { CreateUserEvent } from './event/create-user.event';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WalletEntity } from './entities/wallet.entity';
-import { GetUserInfoMessage } from './get-user-info-message';
+import { GetUserInfoMessage } from './message/get-user-info.message';
 import { UpdateUserEvent } from './event/update-user.event';
 import { UpdateUserAmountEvent } from './event/update-user-amount.event';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { GetUserAmount } from './get-user-amount.message';
+import { GetUserAmount } from './message/get-user-amount.message';
 
 
 @Injectable()
