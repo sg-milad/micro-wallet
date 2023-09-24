@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Gender } from "apps/user-service/src/common/enum/gender.enum";
-import { IsString, IsOptional } from "class-validator";
+import { IsString, IsOptional, IsEnum } from "class-validator";
 
 export class UpdateUserDto {
     @ApiProperty()
@@ -19,7 +19,7 @@ export class UpdateUserDto {
     lastName: string;
 
     @ApiProperty({ enum: Gender, enumName: "Gender", format: "enum", example: Gender.OTHER, })
-    @IsString()
+    @IsEnum(Gender)
     @IsOptional()
     gender: Gender;
 

@@ -9,9 +9,10 @@ services:
       - db
     ports:
       - 3000:3000
-  db:
+
+  db-user:
     image: postgres:latest
-    container_name: nest-db
+    container_name: nest-user
     env_file:
       - .env
     restart: always
@@ -20,11 +21,25 @@ services:
     volumes:
       # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - pgdata:/var/lib/postgresql/data
+
+  db-wallet:
+    image: postgres:latest
+    container_name: nest-wallet
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - 5431:5432
+    volumes:
+      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+
   redis:
     image: redis:latest
     container_name: nest-redis
     ports:
       - 6379:6379
+
   kafdrop:
     image: obsidiandynamics/kafdrop
     restart: 'yes'
@@ -35,6 +50,7 @@ services:
       JVM_OPTS: '-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify'
     depends_on:
       - 'kafka'
+
   kafka:
     image: obsidiandynamics/kafka
     restart: 'yes'

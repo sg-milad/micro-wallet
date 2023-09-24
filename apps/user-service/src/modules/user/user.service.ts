@@ -62,9 +62,7 @@ export class UserService {
             return await this.updateUserInfo(user, updateUser);
 
         } catch (err) {
-            if (err.code === '23505') {
-                throw new HttpException('User already exists', 400);
-            }
+            throw new HttpException('internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
