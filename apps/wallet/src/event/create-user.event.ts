@@ -1,6 +1,6 @@
 export class CreateUserEvent {
     constructor(
-        public readonly id: string
+        public readonly userId: string
     ) { }
 
 }

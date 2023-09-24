@@ -3,7 +3,7 @@ import { WalletModule } from './wallet.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(WalletModule,
+  const microApp = await NestFactory.createMicroservice<MicroserviceOptions>(WalletModule,
     {
       transport: Transport.KAFKA,
       options: {
@@ -16,6 +16,7 @@ async function bootstrap() {
         },
       }
     });
-  await app.listen();
+
+  await microApp.listen();
 }
 bootstrap();

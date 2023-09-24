@@ -17,7 +17,17 @@ export class WalletController {
   }
   @EventPattern('user-updated')
   async handleUserUpdated(data: any) {
-    console.log(data);
+    console.log("data", data);
     this.walletService.handelUpdateUser(data);
+  }
+
+  @EventPattern('user-amount-updated')
+  async handleUserAmountUpdated(data: any) {
+    this.walletService.handelUpdateUserAmount(data);
+  }
+
+  @MessagePattern('get-user-amount')
+  async handleGetUserAmount(@Payload() data: any) {
+    return this.walletService.getUserAmount(data);
   }
 }

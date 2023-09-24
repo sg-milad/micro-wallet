@@ -1,11 +1,10 @@
-export class CreateUserEvent {
+export class GetUserAmount {
     constructor(
-        public readonly id: string
+        public amount: number,
     ) { }
-
     toString() {
         return JSON.stringify({
-            id: this.id
+            amount: this.amount,
         });
     }
 }

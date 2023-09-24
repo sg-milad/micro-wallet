@@ -1,13 +1,15 @@
-import { HttpException, Inject, Injectable, Res } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Res } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../../entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ClientKafka } from '@nestjs/microservices';
-import { CreateUserEvent } from './create-user.event';
+import { CreateUserEvent } from './event/create-user.event';
 import { map } from 'rxjs';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateUserEvent } from './update-user.event';
+import { UpdateUserEvent } from './event/update-user.event';
+import { UpdateUserAmountDto } from './dto/update-user-amount';
+import { UpdateUserAmount } from './event/update-user-amount.event';
 @Injectable()
 export class UserService {
     constructor(
@@ -69,5 +71,22 @@ export class UserService {
     async updateUserInfo(user: Partial<UserEntity>, prop: Partial<UserEntity>) {
         Object.assign(user, { ...prop })
         return await this.userRepository.save(user);
+    }
+
+    async updateUserAmount(id: string, updateUserAmountDto: UpdateUserAmountDto) {
+        const user = await this.userRepository.findOne({ where: { id } });
+        if (!user) {
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+        }
+        this.client.emit('user-amount-updated', new UpdateUserAmount(user.id, updateUserAmountDto.amount));
+        return Object.assign(user, updateUserAmountDto);
+    }
+
+    async getUserAmount(id: string) {
+        return this.client.send('get-user-amount', id).pipe(map((data: any) => {
+            console.log(data);
+
+            return data
+        }));
     }
 }
