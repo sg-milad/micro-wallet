@@ -11,18 +11,19 @@ dotenv.config({
 export const options: TypeOrmModuleOptions = {
     type: 'postgres',
     host: process.env.DB_WALLET_HOST || 'localhost',
-    port: +process.env.DB_WALLET_PORT || 5431,
+    port: +process.env.DB_WALLET_PORT || 5433,
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database:
         process.env.NODE_ENV === 'tEsT'
             ? 'test'
-            : process.env.POSTGRES_DB_WALLET || 'postgres_wallet',
+            : process.env.POSTGRES_DB_WALLET || 'postgres',
     entities: [WalletEntity],
     migrationsRun: true,
     synchronize: true,
 
 };
+console.log(options);
 
 function DatabaseOrmModule(): DynamicModule {
     return TypeOrmModule.forRoot(options);

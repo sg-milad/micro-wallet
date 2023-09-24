@@ -29,9 +29,11 @@ export class UserService {
             return result
 
         } catch (err) {
+
             if (err.code === '23505') {
                 throw new HttpException('User already exists', 400);
             }
+            throw err
         }
 
     }

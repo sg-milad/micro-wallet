@@ -6,9 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { WalletEntity } from './entities/wallet.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [DatabaseModule,
+    ConfigModule.forRoot(),
     TypeOrmModule.forFeature([WalletEntity]),
     CacheModule.register({
       isGlobal: true,

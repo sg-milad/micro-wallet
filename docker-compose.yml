@@ -3,36 +3,47 @@ services:
   nest:
     env_file:
       - .env
+    environment:
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 29092
     build: .
     container_name: nest-app
+    restart: always
     depends_on:
-      - db
+      - db-user
+      - db-wallet
+      - kafka
+      - redis
     ports:
       - 3000:3000
 
   db-user:
     image: postgres:latest
-    container_name: nest-user
-    env_file:
-      - .env
+    container_name: db-user
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgres
     restart: always
     ports:
-      - 5432:5432
-    volumes:
-      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - pgdata:/var/lib/postgresql/data
+      - 5433:5432
+    # volumes:
+    #   # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    #   - pgdata:/var/lib/postgresql/data
 
   db-wallet:
     image: postgres:latest
-    container_name: nest-wallet
-    env_file:
-      - .env
+    container_name: db-wallet
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgres
     restart: always
     ports:
-      - 5431:5432
-    volumes:
-      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - pgdata:/var/lib/postgresql/data
+      - 5432:5432
+    # volumes:
+    #   # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    #   - pgdata-wallet:/var/lib/postgresql/data
 
   redis:
     image: redis:latest
@@ -42,7 +53,10 @@ services:
 
   kafdrop:
     image: obsidiandynamics/kafdrop
-    restart: 'yes'
+    container_name: kafdrop
+    restart: always
+    networks:
+      - app-network
     ports:
       - '9000:9000'
     environment:
@@ -53,19 +67,32 @@ services:
 
   kafka:
     image: obsidiandynamics/kafka
-    restart: 'yes'
+    container_name: kafka
+    hostname: kafka
+    restart: always
+    networks:
+      - app-network
     ports:
       - '2181:2181'
       - '9092:9092'
+      - '29092:29092'
     environment:
       KAFKA_LISTENERS: 'INTERNAL://:29092,EXTERNAL://:9092'
+      KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka:29092,EXTERNAL://localhost:9092'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      KAFKA_INTER_BROKER_EXTERNAL_NAME: 'EXTERNAL'
       KAFKA_ZOOKEEPER_SESSION_TIMEOUT: '6000'
       KAFKA_RESTART_ATTEMPTS: '10'
-      KAFKA_RESTART_DELAY: '5'
+      KAFKA_RESTART_DELAY: '10'
+      KAFKA_RETRY_COUNT: '10'
       ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: '0'
-
-volumes:
-  pgdata:
+      KAFKA_ADVERTISED_PORT: 9092
+# volumes:
+#   pgdata:
+#   pgdata-wallet:
+networks:
+  app-network:
+    name: app-network
+    driver: bridge
