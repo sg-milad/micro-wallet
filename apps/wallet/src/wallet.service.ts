@@ -4,19 +4,15 @@ import { CreateUserEvent } from './create-user.event';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WalletEntity } from './entities/wallet.entity';
 import { GetUserInfoMessage } from './get-user-info-message';
+import { UpdateUserEvent } from './update-user.event';
 
 
 @Injectable()
 export class WalletService {
   constructor(@InjectRepository(WalletEntity) private readonly walletRepository: Repository<WalletEntity>,) { }
   async handelCreateUser(createUserEvent: CreateUserEvent) {
-
-    const user = await this.walletRepository.findOne({ where: { userId: createUserEvent.id } });
-
-    if (user) {
-      throw new HttpException('User already exists', 400);
-    }
     const saveUser = await this.walletRepository.save({ userId: createUserEvent.id });
+    console.log(saveUser);
   }
 
   async getUserInfo(id: string) {
@@ -26,5 +22,14 @@ export class WalletService {
     }
 
     return new GetUserInfoMessage(user.id, user.amount, user.userId);
+  }
+  async handelUpdateUser(updateUserEvent: UpdateUserEvent) {
+
+    const user = await this.walletRepository.findOne({ where: { userId: updateUserEvent.userId } });
+
+    user.amount = updateUserEvent.amount;
+
+    const saveUser = await this.walletRepository.save(user);
+
   }
 }

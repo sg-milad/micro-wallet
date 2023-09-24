@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Inject, OnModuleInit, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, OnModuleInit, Param, Patch, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ClientKafka, EventPattern } from '@nestjs/microservices';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('User')
 @Controller("user")
@@ -26,6 +27,14 @@ export class UserController implements OnModuleInit {
     })
     async getUserInfo(@Param("id") id: string) {
         return await this.userService.getUserInfo(id);
+    }
+
+    @Patch(":id")
+    @ApiOperation({
+        description: 'Update user info'
+    })
+    async updateUser(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
+        return await this.userService.updateUser(id, updateUserDto);
     }
 
     async onModuleInit() {
