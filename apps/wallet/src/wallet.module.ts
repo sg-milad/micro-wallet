@@ -7,6 +7,7 @@ import { WalletEntity } from './entities/wallet.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { ConfigModule } from '@nestjs/config';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [DatabaseModule,
@@ -18,6 +19,22 @@ import { ConfigModule } from '@nestjs/config';
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
     }),
+    ClientsModule.register([
+      {
+        name: 'User-Service',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            clientId: 'User',
+            // brokers: ['kafka:29092'],
+            brokers: ['localhost:9092'],
+          },
+          consumer: {
+            groupId: 'user-consumer',
+          },
+        },
+      },
+    ]),
   ],
   controllers: [WalletController],
   providers: [WalletService],

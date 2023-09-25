@@ -7,21 +7,21 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [DatabaseModule, UserModule,
     ConfigModule.forRoot(),
-    ClientsModule.register({
-      clients: [{
-        name: 'Wallet-Service',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            clientId: 'wallet',
-            brokers: ['kafka:29092'],
-          },
-          consumer: {
-            groupId: 'wallet-consumer'
-          }
-        }
-
-      }]
-    })],
+    // ClientsModule.register({
+    //   clients: [{
+    //     name: 'User-Service',
+    //     transport: Transport.KAFKA,
+    //     options: {
+    //       client: {
+    //         clientId: 'user',
+    //         brokers: ['kafka:29092'],
+    //       },
+    //       consumer: {
+    //         groupId: 'user-consumer'
+    //       }
+    //     }
+    //   }]
+    // })
+  ],
 })
 export class AppModule { }

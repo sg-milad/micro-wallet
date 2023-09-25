@@ -1,14 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UpdateUserAmountDto } from './dto/update-user-amount.dto';
 
-@Controller()
+@ApiTags('Wallet')
+@Controller('user')
 export class WalletController {
   constructor(private readonly walletService: WalletService) { }
 
   @EventPattern('user-created')
   async handleUserCreated(data: any) {
-    this.walletService.handelCreateUser(data);
+    this.walletService.handleCreateUser(data);
   }
 
   @MessagePattern('get-user')
@@ -18,16 +21,24 @@ export class WalletController {
   @EventPattern('user-updated')
   async handleUserUpdated(data: any) {
     console.log("data", data);
-    this.walletService.handelUpdateUser(data);
+    this.walletService.handleUpdateUser(data);
   }
 
-  @EventPattern('user-amount-updated')
-  async handleUserAmountUpdated(data: any) {
-    this.walletService.handelUpdateUserAmount(data);
+  @Patch(":id/amount")
+  @ApiOperation({
+    description: 'Update user amount'
+  })
+  async updateUserAmount(
+    @Param("id", new ParseUUIDPipe({ version: "4" })) id: string,
+    @Body() updateUserAmountDto: UpdateUserAmountDto) {
+    return await this.walletService.updateUserAmount(id, updateUserAmountDto);
   }
 
-  @MessagePattern('get-user-amount')
-  async handleGetUserAmount(@Payload() data: any) {
-    return this.walletService.getUserAmount(data);
+  @Get(":id/amount")
+  @ApiOperation({
+    description: 'Get user amount'
+  })
+  async getUserAmount(@Param("id", new ParseUUIDPipe({ version: "4" })) id: string) {
+    return await this.walletService.getUserAmount(id);
   }
 }

@@ -8,85 +8,100 @@ import { CreateUserEvent } from './event/create-user.event';
 import { map } from 'rxjs';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserEvent } from './event/update-user.event';
-import { UpdateUserAmountDto } from './dto/update-user-amount.dto';
-import { UpdateUserAmount } from './event/update-user-amount.event';
+import { LoggerService } from '../../common/logger/logger.service';
+import { GetUserAmount } from './event/get-user-amount.message';
 @Injectable()
 export class UserService {
+    private readonly logger = new LoggerService(UserService.name);
     constructor(
         @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
         @Inject('Wallet-Service') private readonly client: ClientKafka
     ) { }
     async createUser(createUser: CreateUserDto) {
         try {
-            const user = await this.userRepository.findOne({ where: { Username: createUser.Username } });
-            if (user) {
-                throw new HttpException('User already exists', 400);
+            const existingUser = await this.userRepository.findOne({
+                where: { Username: createUser.Username },
+            });
+
+            if (existingUser) {
+                throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
             }
-            const result = await this.userRepository.save(createUser);
 
-            this.client.emit('user-created', new CreateUserEvent(result.id));
+            const newUser = await this.userRepository.save(createUser);
 
-            return result
+            this.emitUserCreatedEvent(newUser.id);
 
+            return newUser;
         } catch (err) {
-
             if (err.code === '23505') {
-                throw new HttpException('User already exists', 400);
+                throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
             }
-            throw err
+            throw err;
         }
-
     }
 
     async getUserInfo(id: string) {
-        const user = await this.userRepository.findOne({ where: { id } });
-        if (!user) {
-            throw new HttpException('User not found', 400);
-        }
-        return this.client.send('get-user', user.id).pipe(map((data: any) => {
-            delete data.id
-            delete data.userId
-            return Object.assign(user, data);
-        }));
+        const user = await this.findUserById(id);
+
+        return this.client.send('get-user', user.id).pipe(
+            map((data: any) => {
+                delete data.id;
+                delete data.userId;
+                return Object.assign(user, data);
+            }),
+        );
     }
 
     async updateUser(id: string, updateUserDto: UpdateUserDto) {
         try {
-            const { amount, ...updateUser } = updateUserDto
-            const user = await this.userRepository.findOne({ where: { id } });
-            if (!user) {
-                throw new HttpException('User not found', 400);
-            }
-            if (amount) {
-                this.client.emit('user-updated', new UpdateUserEvent(user.id, amount));
+            const user = await this.findUserById(id);
+
+            if (updateUserDto.Username) {
+                await this.checkUsernameUniqueness(id, updateUserDto.Username);
             }
 
-            return await this.updateUserInfo(user, updateUser);
+            if (updateUserDto.amount) {
+                this.emitUserUpdatedEvent(user.id, updateUserDto.amount);
+            }
 
+            return await this.updateUserInfo(user, updateUserDto);
         } catch (err) {
-            throw new HttpException('internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw err;
         }
     }
 
-    async updateUserInfo(user: Partial<UserEntity>, prop: Partial<UserEntity>) {
-        Object.assign(user, { ...prop })
-        return await this.userRepository.save(user);
-    }
-
-    async updateUserAmount(id: string, updateUserAmountDto: UpdateUserAmountDto) {
+    private async findUserById(id: string) {
         const user = await this.userRepository.findOne({ where: { id } });
         if (!user) {
             throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
         }
-        this.client.emit('user-amount-updated', new UpdateUserAmount(user.id, updateUserAmountDto.amount));
-        return Object.assign(user, updateUserAmountDto);
+        return user
     }
 
-    async getUserAmount(id: string) {
-        return this.client.send('get-user-amount', id).pipe(map((data: any) => {
-            console.log(data);
+    private async checkUsernameUniqueness(userId: string, username: string) {
+        const existingUser = await this.userRepository.findOne({
+            where: { Username: username },
+        });
 
-            return data
-        }));
+        if (existingUser) {
+            throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private async updateUserInfo(user: Partial<UserEntity>, prop: Partial<UserEntity>) {
+        Object.assign(user, { ...prop });
+        return await this.userRepository.save(user);
+    }
+
+    private emitUserCreatedEvent(userId: string) {
+        this.client.emit('user-created', new CreateUserEvent(userId));
+    }
+
+    private emitUserUpdatedEvent(userId: string, amount: number) {
+        this.client.emit('user-updated', new UpdateUserEvent(userId, amount));
+    }
+
+    async getUserAmount(getUserAmount: GetUserAmount) {
+        this.logger.log('getUserAmount', getUserAmount.amount);
     }
 }

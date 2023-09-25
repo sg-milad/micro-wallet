@@ -1,22 +1,29 @@
 import { NestFactory } from '@nestjs/core';
 import { WalletModule } from './wallet.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { setupSwagger } from './swagger';
+import { LoggerService } from 'apps/user-service/src/common/logger/logger.service';
 
 async function bootstrap() {
-  const microApp = await NestFactory.createMicroservice<MicroserviceOptions>(WalletModule,
-    {
-      transport: Transport.KAFKA,
-      options: {
-        client: {
-          brokers: ['kafka:29092'],
-          clientId: 'wallet',
-        },
-        consumer: {
-          groupId: 'wallet-consumer',
-        },
-      }
-    });
+  const app = await NestFactory.create(WalletModule);
+  app.setGlobalPrefix('/api');
 
-  await microApp.listen();
+  setupSwagger(app);
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: ['localhost:9092'],
+        // clientId: 'user',
+      },
+      consumer: {
+        groupId: 'wallet-consumer',
+      },
+    }
+  });
+  await app.startAllMicroservices();
+  await app.listen(3001, () => {
+    LoggerService.log(`listening on port ${3001}`);
+  });
 }
 bootstrap();
