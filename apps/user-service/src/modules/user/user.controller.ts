@@ -4,7 +4,6 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ClientKafka, EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateUserAmountDto } from '../../../../wallet/src/dto/update-user-amount.dto';
 
 @ApiTags('User')
 @Controller("user")
@@ -39,30 +38,13 @@ export class UserController implements OnModuleInit {
         return await this.userService.updateUser(id, updateUserDto);
     }
 
-    // @Patch(":id/amount")
-    // @ApiOperation({
-    //     description: 'Update user amount'
-    // })
-    // async updateUserInfo(@Param("id", new ParseUUIDPipe({ version: "4" })) id: string, @Body() updateUserAmountDto: UpdateUserAmountDto) {
-    //     return await this.userService.updateUserAmount(id, updateUserAmountDto);
-    // }
-
-    // @Get(":id/amount")
-    // @ApiOperation({
-    //     description: 'Get user amount'
-    // })
-    // async getUserAmount(@Param("id", new ParseUUIDPipe({ version: "4" })) id: string) {
-    //     return await this.userService.getUserAmount(id);
-    // }
-
     @MessagePattern('get-user-amount')
     async handleGetUserAmount(@Payload() data: any) {
         this.userService.getUserAmount(data);
     }
 
-
     async onModuleInit() {
         this.client.subscribeToResponseOf('get-user');
-        this.client.subscribeToResponseOf('get-user-amount');
+        // this.client.subscribeToResponseOf('get-user-amount');
     }
 }
