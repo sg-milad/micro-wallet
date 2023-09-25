@@ -67,7 +67,7 @@ export class WalletService {
   async getUserAmount(id: string) {
     const cachedUser = await this.getCachedUser(id);
 
-    if (cachedUser) {
+    if (cachedUser.amount) {
       this.emitGetUserAmountEvent(cachedUser.amount);
       return { amount: cachedUser.amount }
     }

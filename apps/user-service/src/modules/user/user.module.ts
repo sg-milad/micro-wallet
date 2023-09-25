@@ -15,7 +15,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
                 client: {
                     clientId: 'wallet',
                     // brokers: ['kafka:29092'],
-                    brokers: ['localhost:9092'],
+                    brokers: [process.env.KAFKA_BROKER],
                 },
                 consumer: {
                     groupId: 'wallet-consumer',

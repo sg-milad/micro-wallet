@@ -15,7 +15,7 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: ['localhost:9092'],
+        brokers: [process.env.KAFKA_BROKER],
         // clientId: 'user-service',
       },
       consumer: {
@@ -25,7 +25,7 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe());
   await app.startAllMicroservices();
-  await app.listen(3002, () => {
+  await app.listen(3000, () => {
     LoggerService.log(`listening on port ${3002}`);
   });
 }

@@ -23,7 +23,6 @@ export const options: TypeOrmModuleOptions = {
     synchronize: true,
 
 };
-console.log(options);
 
 function DatabaseOrmModule(): DynamicModule {
     return TypeOrmModule.forRoot(options);

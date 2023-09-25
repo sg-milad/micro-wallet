@@ -20,7 +20,6 @@ export class WalletController {
   }
   @EventPattern('user-updated')
   async handleUserUpdated(data: any) {
-    console.log("data", data);
     this.walletService.handleUpdateUser(data);
   }
 

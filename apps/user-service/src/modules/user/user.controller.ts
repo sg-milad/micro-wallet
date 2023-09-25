@@ -57,8 +57,6 @@ export class UserController implements OnModuleInit {
 
     @MessagePattern('get-user-amount')
     async handleGetUserAmount(@Payload() data: any) {
-        console.log("get-user-amountttt", data);
-
         this.userService.getUserAmount(data);
     }
 
