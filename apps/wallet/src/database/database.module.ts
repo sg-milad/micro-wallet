@@ -14,10 +14,7 @@ export const options: TypeOrmModuleOptions = {
     port: +process.env.DB_WALLET_PORT || 5433,
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
-    database:
-        process.env.NODE_ENV === 'tEsT'
-            ? 'test'
-            : process.env.POSTGRES_DB_WALLET || 'postgres',
+    database: "postgres",
     entities: [WalletEntity],
     migrationsRun: true,
     synchronize: true,

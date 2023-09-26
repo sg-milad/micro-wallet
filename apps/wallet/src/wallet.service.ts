@@ -67,7 +67,7 @@ export class WalletService {
   async getUserAmount(id: string) {
     const cachedUser = await this.getCachedUser(id);
 
-    if (cachedUser.amount) {
+    if (cachedUser !== null) {
       this.emitGetUserAmountEvent(cachedUser.amount);
       return { amount: cachedUser.amount }
     }
@@ -78,7 +78,7 @@ export class WalletService {
       throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
     }
     await this.cacheUser(id, user);
-    this.client.emit('get-user-amount', new GetUserAmount(cachedUser.amount));
+    this.client.emit('get-user-amount', new GetUserAmount(user.amount));
     return { amount: user.amount }
   }
 
@@ -95,7 +95,7 @@ export class WalletService {
   }
 
   private async getCachedUser(id: string) {
-    return this.cacheService.get<{ amount: number }>(id);
+    return await this.cacheService.get<{ amount: number }>(id);
   }
 
   private emitUserAmountUpdatedEvent(userId: string, amount: number) {
